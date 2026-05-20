@@ -45,36 +45,6 @@ When you visit any product page online, **ProductScout** automatically:
 | **Price Data** | SerpAPI (Google Shopping) / Affiliate APIs |
 | **Hosting** | Railway / Render |
 
----
-
-## 📁 Project Structure
-
-```
-ProductScout/
-├── public/
-│   ├── manifest.json          # Chrome Extension manifest (MV3)
-│   └── icons/                 # Extension icons (16, 48, 128px)
-├── src/
-│   ├── background/
-│   │   └── index.ts           # Service Worker — handles API calls
-│   ├── content/
-│   │   └── index.tsx          # Content Script — injected into pages
-│   ├── popup/
-│   │   ├── Popup.tsx          # Main popup React component
-│   │   └── index.tsx          # Popup entry point
-│   ├── components/
-│   │   ├── ProductCard.tsx    # Detected product display
-│   │   ├── DealCard.tsx       # Individual deal result card
-│   │   └── DealsList.tsx      # Sorted list of deals
-│   └── utils/
-│       ├── productDetector.ts # DOM + Schema.org product extraction
-│       └── priceComparator.ts # API calls for price comparison
-├── package.json
-├── vite.config.ts
-└── tsconfig.json
-```
-
----
 
 ## ⚙️ Getting Started
 
@@ -93,7 +63,7 @@ cd ProductScout
 
 # Install dependencies
 npm install
-
+ 
 # Start development build (with hot reload)
 npm run dev
 ```
