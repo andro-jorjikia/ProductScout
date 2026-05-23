@@ -22,6 +22,7 @@ function hasProductPageSignals(): boolean {
   const urlPatterns = [
     /amazon\.[a-z.]+\/.*\/dp\//i,
     /amazon\.[a-z.]+\/dp\//i,
+    /amazon\.[a-z.]+\/gp\/product\//i,
     /ebay\.[a-z.]+\/itm\//i,
     /aliexpress\.[a-z.]+\/item\//i,
     /walmart\.[a-z.]+\/ip\//i,
@@ -31,6 +32,10 @@ function hasProductPageSignals(): boolean {
     productSelectors.some((selector) => Boolean(document.querySelector(selector))) ||
     urlPatterns.some((pattern) => pattern.test(window.location.href))
   )
+}
+
+function isAmazonProductPage(): boolean {
+  return /amazon\.[a-z.]+\/(.*\/)?(dp|gp\/product)\//i.test(window.location.href)
 }
 
 function normalizeJsonLdItems(value: unknown): unknown[] {
@@ -115,7 +120,7 @@ function detectFromJsonLd(): Partial<DetectedProduct> | null {
 export function detectProduct(): DetectedProduct | null {
   const jsonLdProduct = detectFromJsonLd()
 
-  if (!jsonLdProduct && !hasProductPageSignals()) {
+  if (!jsonLdProduct && !hasProductPageSignals() && !isAmazonProductPage()) {
     return null
   }
 
