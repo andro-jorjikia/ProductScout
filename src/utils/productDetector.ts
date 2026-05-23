@@ -4,6 +4,35 @@ function getMetaContent(selector: string): string | undefined {
   return document.querySelector<HTMLMetaElement>(selector)?.content?.trim()
 }
 
+function getTextContent(selector: string): string | undefined {
+  return document.querySelector(selector)?.textContent?.trim()
+}
+
+function hasProductPageSignals(): boolean {
+  const productSelectors = [
+    '#productTitle',
+    '#landingImage',
+    '.a-price .a-offscreen',
+    '#priceblock_ourprice',
+    '#priceblock_dealprice',
+    '[itemtype*="schema.org/Product"]',
+    '[property="product:price:amount"]',
+  ]
+
+  const urlPatterns = [
+    /amazon\.[a-z.]+\/.*\/dp\//i,
+    /amazon\.[a-z.]+\/dp\//i,
+    /ebay\.[a-z.]+\/itm\//i,
+    /aliexpress\.[a-z.]+\/item\//i,
+    /walmart\.[a-z.]+\/ip\//i,
+  ]
+
+  return (
+    productSelectors.some((selector) => Boolean(document.querySelector(selector))) ||
+    urlPatterns.some((pattern) => pattern.test(window.location.href))
+  )
+}
+
 function normalizeJsonLdItems(value: unknown): unknown[] {
   if (Array.isArray(value)) {
     return value
@@ -86,8 +115,13 @@ function detectFromJsonLd(): Partial<DetectedProduct> | null {
 export function detectProduct(): DetectedProduct | null {
   const jsonLdProduct = detectFromJsonLd()
 
+  if (!jsonLdProduct && !hasProductPageSignals()) {
+    return null
+  }
+
   const title =
     jsonLdProduct?.title ||
+    getTextContent('#productTitle') ||
     getMetaContent('meta[property="og:title"]') ||
     getMetaContent('meta[name="twitter:title"]') ||
     document.querySelector('h1')?.textContent?.trim()
@@ -98,12 +132,20 @@ export function detectProduct(): DetectedProduct | null {
 
   return {
     title,
-    price: jsonLdProduct?.price,
-    currency: jsonLdProduct?.currency,
+    price:
+      jsonLdProduct?.price ||
+      getMetaContent('meta[property="product:price:amount"]') ||
+      getTextContent('.a-price .a-offscreen') ||
+      getTextContent('#priceblock_ourprice') ||
+      getTextContent('#priceblock_dealprice'),
+    currency:
+      jsonLdProduct?.currency ||
+      getMetaContent('meta[property="product:price:currency"]'),
     image:
       jsonLdProduct?.image ||
       getMetaContent('meta[property="og:image"]') ||
-      getMetaContent('meta[name="twitter:image"]'),
+      getMetaContent('meta[name="twitter:image"]') ||
+      document.querySelector<HTMLImageElement>('#landingImage')?.src,
     url: window.location.href,
     site: window.location.hostname,
   }
